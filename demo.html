@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DEATH☆DREAM — Persona Composer</title><link rel="stylesheet" href="assets/style.css"></head><body>
+<nav><a class="logo" href="index.html" style="margin:0;color:var(--gold)">DEATH☆DREAM</a><div><a href="index.html">Home</a></div></nav>
+<section><div class="eyebrow">Demo · local engine, no data leaves this page</div><h2>Persona Composer</h2><div class="cols">
+<form id="f" class="card"><label>Name</label><input name="name"><label>Years</label><input name="years"><label>Era / place</label><input name="era"><label>Role</label><input name="role"><label>Personality traits</label><input name="traits"><label>Sayings (one per line)</label><textarea name="sayings" rows="4"></textarea><label>Memories (one per line)</label><textarea name="memories" rows="6"></textarea>
+<button class="btn solid" type="submit">Save &amp; awaken</button><button class="btn" type="button" id="dl">Export JSON</button><button class="btn" type="button" id="rs">Load Odile</button></form>
+<div><div class="card" style="padding:20px"><div class="who" id="title"></div><div class="note">A Dream is an interpretation, not the person.</div></div><div class="chat" id="chat"></div><form id="cf" style="display:flex;gap:10px"><input id="q" placeholder="Speak to the Dream…" autocomplete="off"><button class="btn solid" style="margin:6px 0 14px">Send</button></form></div></div></section>
+<script src="assets/engine.js"></script><script>
+let P;const F=document.getElementById('f');
+function fill(p){for(const k of["name","years","era","role","traits"])F[k].value=p[k]||"";F.sayings.value=list(p.sayings).join("\n");F.memories.value=list(p.memories).join("\n")}
+function read(){const d=Object.fromEntries(new FormData(F));d.sayings=list(d.sayings);d.memories=list(d.memories);return d}
+function add(who,t){const m=document.createElement('div');m.className='msg '+(who?'them':'me');m.innerHTML=`<div class="who">${who||'You'}</div>`;m.append(t);chat.append(m);chat.scrollTop=1e9}
+function awaken(p){P=p;localStorage.setItem('dd_persona',JSON.stringify(p));title.textContent=p.name+(p.years?' · '+p.years:'');chat.innerHTML='';add(p.name,`${pick(list(p.sayings))||'Hello.'} Ask me anything, my dear.`)}
+F.onsubmit=e=>{e.preventDefault();awaken(read())};rs.onclick=()=>{fill(ODILE);awaken(ODILE)};
+dl.onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(read(),null,2)],{type:'application/json'}));a.download='dream.json';a.click()};
+cf.onsubmit=e=>{e.preventDefault();const t=q.value.trim();if(!t)return;add(null,t);q.value='';setTimeout(()=>add(P.name,reply(P,t)),350)};
+const saved=JSON.parse(localStorage.getItem('dd_persona')||'null')||ODILE;fill(saved);awaken(saved);
+if(location.hash=='#auto'){for(const t of["Hello Odile","Tell me about the storm","I miss you","Who are you?"]){add(null,t);add(P.name,reply(P,t))}}
+</script></body></html>
